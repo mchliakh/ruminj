@@ -174,10 +174,6 @@ class Parser
 				[:plus, :minus, :bor] => -> { add_op; term; arith_expr_ },
 				[:rsracket, :bequal, :nequal, :lthan, :gthan, :ltoequal, :gtoequal, :comma, :rbracket, :semicol] => EPSILON
 			},
-			# sign: {
-			# 	[:plus] => -> { match :plus },
-			# 	[:minus] => -> { match :minus }
-			# },
 			term: {
 				[:num, :int, :lbracket, :bnot, :id, :plus, :minus] => -> { factor; term_ }
 			},
@@ -199,7 +195,11 @@ class Parser
 				[:mult, :divide, :band, :plus, :minus, :bor, :rsracket, :bequal, :nequal, :lthan, :gthan, :ltoequal, :gtoequal, :comma, :rbracket, :semicol] => EPSILON
 			},
 			minusfactor: {
-				[:gthan] => -> { match :gthan, :id, :lbracket; a_params; match :rbracket },
+				[:gthan] => -> {
+					match :gthan
+					confirm_function_declaration(match_id :id)
+					match :lbracket; a_params; match :rbracket
+				},
 				[:minus, :num, :int, :lbracket, :bnot, :plus, :id] => -> { factor }
 			},
 			variable: {
@@ -345,6 +345,15 @@ class Parser
 			return if @current_record.find_local(id, SymbolTable::Variable)
 			return if @current_record.descendant_of?(SymbolTable::Class) && @current_record.find_up_to(id, SymbolTable::Variable, SymbolTable::Class)
 			abort "Variable #{id} is undefined!"
+		end
+
+		def confirm_function_declaration(id)
+			if @current_record.is_a? SymbolTable::Program
+				return if @global_scope.find(id, SymbolTable::Function)
+			else
+				return if @current_record.find_up_to(id, SymbolTable::Function, SymbolTable::Class)
+			end
+			abort "Function #{id} is undefined!"
 		end
 
 		def check_for_duplicate_declaration(id, klass)

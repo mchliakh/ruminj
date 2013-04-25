@@ -21,8 +21,8 @@ class Adder {
 		return (a + b);
 	};
 
-	real test() {
-		// do nothing
+	integer test() {
+		return (->addydaddy());
 	};
 };
 
