@@ -1,0 +1,40 @@
+<prog> -> <classDeclList> <progBody>
+<classDeclList> -> class id { <varOrFuncList> } ; <classDeclList> | EPSILON
+<varOrFuncList> -> <type> id <varOrFunc'> ; <varOrFuncList> | EPSILON
+<varOrFunc'> -> <arraySizeList> | <funcDef>
+<progBody> -> <funcDefList> program <funcBody> ;
+<funcDefList> -> <type> id <funcDef> ; <funcDefList> | EPSILON
+<funcHead> -> ( <fParams> )
+<funcDef> -> <funcHead> <funcBody>
+<funcBody> -> { <varOrStatementList> }
+<varOrStatementList> -> <varOrStatement> ; <varOrStatementList> | EPSILON
+<varOrStatement> -> id <varOrStatement'> | <varDeclNoId> | <statement>
+<varOrStatement'> -> <varDecl> | <varStatement>
+<varDeclNoId> -> integer <varDecl> | real <varDecl>
+<varDecl> -> id <arraySizeList>
+<varStatement> -> <indiceList> <rIdnestList> <assignOp> <expr>
+<arraySizeList> -> lbr int rbr <arraySizeList> | EPSILON
+<statement> -> if ( <expr> ) then <statBlock> else <statBlock> | while ( <expr> ) do <statBlock> | read ( <variable> ) |	write ( <expr> ) | return ( <expr> )
+<statBlock> -> { <statementList> } | <statement> | EPSILON
+<statementList> -> <statement> ; <statementList> | EPSILON
+<expr> -> <arithExpr> <expr'>
+<expr'> -> <relOp> <arithExpr> | EPSILON
+<arithExpr> -> <term> <arithExpr'>
+<arithExpr'> -> <addOp> <term> <arithExpr'> | EPSILON
+<sign> -> + | -
+<term> -> <factor> <term'>
+<term'> -> <multOp> <factor> <term'> | EPSILON
+<factor> -> <variable> <factor'> | num | ( <expr> ) | not <factor> | <sign> <factor>
+<factor'> -> - > ( <aParams> ) | EPSILON
+<variable> -> id <indiceList> <rIdnestList>
+<rIdnestList> -> . id <indiceList> <rIdnestList> | EPSILON
+<indiceList> -> lbr <arithExpr> rbr <indiceList> | EPSILON
+<type> -> integer | real | id
+<fParams> -> <type> id <arraySizeList> <fParamsTailList> | EPSILON
+<fParamsTailList> -> , <type> id <arraySizeList> <fParamsTailList> | EPSILON
+<aParams> -> <expr> <aParamsTailList> | EPSILON
+<aParamsTailList> -> , <expr> <aParamsTailList> | EPSILON
+<assignOp> -> =
+<relOp> -> == | <> | < | > | <= | >=
+<addOp> -> + | - | or
+<multOp> -> * | / | and

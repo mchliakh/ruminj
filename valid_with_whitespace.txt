@@ -1,0 +1,54 @@
+/*
+A class for adding numbers.
+*/
+class Adder {
+	// instance variables
+	integer x;
+	integer y;
+
+	integer test;
+
+	// methods
+	integer add1() {
+		integer x;
+		integer y;
+		return (x + y);
+	};
+
+	integer add2(integer a, integer b) {
+		integer a;
+		integer b;
+		return (a + b);
+	};
+
+	real test() {
+		// do nothing
+	};
+
+	integer test;
+};
+
+class LittleNothing {
+	Adder a;
+	// Adder a;
+
+	real nothing() {};
+};
+
+integer twelve() {
+	// Notadder2 a;
+	integer num;
+	num = 12;
+	return (num);
+};
+
+real five_point_two() {
+	return (5.2);
+};
+
+program {
+	real a;
+	integer b;
+	Adder c;
+	// twelve();
+};
