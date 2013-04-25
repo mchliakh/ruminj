@@ -174,10 +174,10 @@ class Parser
 				[:plus, :minus, :bor] => -> { add_op; term; arith_expr_ },
 				[:rsracket, :bequal, :nequal, :lthan, :gthan, :ltoequal, :gtoequal, :comma, :rbracket, :semicol] => EPSILON
 			},
-			sign: {
-				[:plus] => -> { match :plus },
-				[:minus] => -> { match :minus }
-			},
+			# sign: {
+			# 	[:plus] => -> { match :plus },
+			# 	[:minus] => -> { match :minus }
+			# },
 			term: {
 				[:num, :int, :lbracket, :bnot, :id, :plus, :minus] => -> { factor; term_ }
 			},
@@ -187,15 +187,20 @@ class Parser
 			},
 			factor: {
 				[:id] => -> { variable; factor_ },
+				[:minus] => -> { match :minus; minusfactor },
 				[:num] => -> { match :num },
 				[:int] => -> { match :int },
 				[:lbracket] => -> { match :lbracket; expr; match :rbracket },
 				[:bnot] => -> { match :bnot; factor },
-				[:plus, :minus] => -> { sign; factor }
+				[:plus] => -> { match :plus; factor }
 			},
 			factor_: {
-				[:minus] => -> { match :minus, :gthan, :lbracket; a_params; match :rbracket },
+				[:minus] => -> { match :minus, :gthan, :id, :lbracket; a_params; match :rbracket },
 				[:mult, :divide, :band, :plus, :minus, :bor, :rsracket, :bequal, :nequal, :lthan, :gthan, :ltoequal, :gtoequal, :comma, :rbracket, :semicol] => EPSILON
+			},
+			minusfactor: {
+				[:gthan] => -> { match :gthan, :id, :lbracket; a_params; match :rbracket },
+				[:minus, :num, :int, :lbracket, :bnot, :plus, :id] => -> { factor }
 			},
 			variable: {
 				[:id] => -> {

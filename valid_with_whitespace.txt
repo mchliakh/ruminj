@@ -48,6 +48,6 @@ program {
 	real a;
 	integer b;
 	Adder c;
-	real twelve;
 	b = c->add1();
+	a = ->five_point_two();
 };

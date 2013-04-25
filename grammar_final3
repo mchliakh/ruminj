@@ -24,8 +24,9 @@
 <sign> -> + | -
 <term> -> <factor> <term'>
 <term'> -> <multOp> <factor> <term'> | EPSILON
-<factor> -> <variable> <factor'> | num | ( <expr> ) | not <factor> | <sign> <factor>
-<factor'> -> - > ( <aParams> ) | EPSILON
+<factor> -> <variable> <factor'> | - <minusfactor> | num | ( <expr> ) | not <factor> | + <factor>
+<factor'> -> - > id ( <aParams> ) | EPSILON
+<minusfactor> -> > id ( <aParams> ) | <factor>
 <variable> -> id <indiceList> <rIdnestList>
 <rIdnestList> -> . id <indiceList> <rIdnestList> | EPSILON
 <indiceList> -> lbr <arithExpr> rbr <indiceList> | EPSILON
