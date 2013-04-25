@@ -24,15 +24,13 @@ class Adder {
 	real test() {
 		// do nothing
 	};
-
-	integer test;
 };
 
 class LittleNothing {
 	Adder a;
-	// Adder a;
+	integer test;
 
-	real nothing() {};
+	real test() {};
 };
 
 integer twelve() {
@@ -50,5 +48,6 @@ program {
 	real a;
 	integer b;
 	Adder c;
-	// twelve();
+	real twelve;
+	b = c->add1();
 };

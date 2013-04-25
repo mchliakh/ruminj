@@ -13,9 +13,9 @@ module SymbolTable
 			@declared
 		end
 
-		def descendant_of?(class_name)
+		def descendant_of?(klass)
 			return false if parent.nil?
-			parent.is_a?(class_name) || parent.descendant_of(class_name)
+			parent.is_a?(klass) || parent.descendant_of?(klass)
 		end
 	end
 
@@ -30,31 +30,26 @@ module SymbolTable
 		def insert(record)
 			puts "Inserted #{record.class.name.split('::').last} #{record.id} into #{self.id}".red
 			record.parent = self
-			@symbol_table[record.id] = record
+			@symbol_table[[record.id, record.class.name]] = record
 		end
 
 		# searches the local symbol table first
 		# then delegates to the parent
-		def find(id)
-			(@symbol_table && @symbol_table[id]) || (parent && parent.find(id))
+		def find(id, klass)
+			(@symbol_table && @symbol_table[[id, klass.name]]) || (parent && parent.find(id, klass.name))
 		end
 
 		# searches the local symbol table only
-		# restricts search to class name if given
-		def find_local(id, class_name=nil)
-			puts "class given #{class_name}" unless class_name.nil?
-			result = @symbol_table && @symbol_table[id]
-			puts "result: #{result}"
-			return result if class_name.nil? || result.nil?
-			return nil if !@symbol_table[id].is_a?(class_name)
+		def find_local(id, klass)
+			@symbol_table && @symbol_table[[id, klass.name]]
 		end
 
-		# searches up to the given class name
-		def find_up_to(id, class_name)
-			if self.is_a? class_name
-				self.find_local(id)
+		# searches up to the given name
+		def find_up_to(id, klass, upto)
+			if self.is_a? upto
+				self.find_local(id, klass)
 			else
-				parent && parent.find_up_to(id, class_name)
+				parent && parent.find_up_to(id, klass, upto)
 			end
 		end
 

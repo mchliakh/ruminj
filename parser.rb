@@ -53,6 +53,7 @@ class Parser
 					array_size_list
 				},
 				[:lbracket] => -> {
+					check_for_duplicate_declaration(@current_record.id, SymbolTable::Function)
 					function = SymbolTable::Function.from_variable(@current_record)
 					switch_back_and_point(function)
 					func_def
@@ -72,6 +73,7 @@ class Parser
 					replace_with SymbolTable::Function.new
 					type
 					@current_record.id = (match_id :id)
+					check_for_duplicate_declaration(@current_record.id, SymbolTable::Function)
 					switch_back_and_point
 					func_def; match :semicol
 					scope_up
@@ -107,7 +109,7 @@ class Parser
 			},
 			var_or_statement_: {
 				[:id] => -> {
-					check_for_class_declaration					
+					confirm_class_declaration					
 					var_decl; switch_back
 				},
 				[:lsracket, :equal, :period] => -> { discard; var_statement }
@@ -197,7 +199,7 @@ class Parser
 			},
 			variable: {
 				[:id] => -> {
-					check_for_variable_declaration(match_id :id)
+					confirm_variable_declaration(match_id :id)
 					indice_list; r_id_nest_list 
 				}
 			},
@@ -215,7 +217,7 @@ class Parser
 				[:realr] => -> { match :realr; @current_record.type = :realr },
 				[:id] => -> {
 					@current_record.type = (match_id :id)
-					check_for_class_declaration					
+					confirm_class_declaration					
 				}
 			},
 			f_params: {
@@ -257,7 +259,7 @@ class Parser
 			}
 		}.each do |n, f|
 			self.class.send :define_method, n do
-				# puts "Now in #{n}"
+				puts "Now in #{n}"
 				# puts "The current record is #{@current_record.class.name.split('::').last}"
 				expected = []
 				f.each do |p, e|
@@ -330,21 +332,18 @@ class Parser
 			@current_record = @temp
 		end
 
-		def check_for_class_declaration
-			abort "Class #{@current_record.type} undefined!" unless @global_scope.find(@current_record.type)
+		def confirm_class_declaration
+			abort "Class #{@current_record.type} is undefined!" unless @global_scope.find(@current_record.type, SymbolTable::Class)
 		end
 
-		def check_for_variable_declaration(id)
-			return unless @current_record.find_local(id).nil?
-			return if @current_record.descendant_of?(SymbolTable::Class) && @current_record.find_up_to(id, SymbolTable::Class)
-			abort "Variable #{id} undefined!"
+		def confirm_variable_declaration(id)
+			return if @current_record.find_local(id, SymbolTable::Variable)
+			return if @current_record.descendant_of?(SymbolTable::Class) && @current_record.find_up_to(id, SymbolTable::Variable, SymbolTable::Class)
+			abort "Variable #{id} is undefined!"
 		end
 
-		def check_for_duplicate_declaration(id, class_name)
-			puts "Checking #{@current_record.id} for duplication"
-			puts "Current record is #{@current_record}"
-			puts "temp is #{@temp}"
-			abort "Variable #{id} is defined twice!" if @temp.find_local(id, class_name)
+		def check_for_duplicate_declaration(id, klass)
+			abort "#{klass.name.split('::').last} #{id} is defined twice!" if @temp.find_local(id, klass)
 		end
 
 		def exit_with_errors
