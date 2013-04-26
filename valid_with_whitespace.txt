@@ -22,7 +22,7 @@ class Adder {
 	};
 
 	integer test() {
-		return (->addydaddy());
+		return(->add1());
 	};
 };
 

@@ -47,7 +47,7 @@ class Parser
 				[:rcbrace] => EPSILON
 			},
 			var_or_func_: {
-				[:lsracket, :semicol] => -> {
+				[:lsbracket, :semicol] => -> {
 					check_for_duplicate_declaration(@current_record.id, SymbolTable::Variable)
 					switch_back_and_point
 					array_size_list
@@ -112,7 +112,7 @@ class Parser
 					confirm_class_declaration					
 					var_decl; switch_back
 				},
-				[:lsracket, :equal, :period] => -> { discard; var_statement }
+				[:lsbracket, :equal, :period] => -> { discard; var_statement }
 			},
 			var_decl_no_id: {
 				[:integerr] => -> {
@@ -138,10 +138,10 @@ class Parser
 				}
 			},
 			var_statement: {
-				[:equal, :lsracket, :period] => -> { indice_list; r_id_nest_list; assign_op; expr }
+				[:equal, :lsbracket, :period] => -> { indice_list; r_id_nest_list; assign_op; expr }
 			},
 			array_size_list: {
-				[:lsracket] => -> { match :lsracket, :int, :rsracket; array_size_list },
+				[:lsbracket] => -> { match :lsbracket, :int, :rsbracket; array_size_list },
 				[:comma, :rbracket, :semicol] => EPSILON
 			},
 			statement: {
@@ -172,14 +172,14 @@ class Parser
 			},
 			arith_expr_: {
 				[:plus, :minus, :bor] => -> { add_op; term; arith_expr_ },
-				[:rsracket, :bequal, :nequal, :lthan, :gthan, :ltoequal, :gtoequal, :comma, :rbracket, :semicol] => EPSILON
+				[:rsbracket, :bequal, :nequal, :lthan, :gthan, :ltoequal, :gtoequal, :comma, :rbracket, :semicol] => EPSILON
 			},
 			term: {
 				[:num, :int, :lbracket, :bnot, :id, :plus, :minus] => -> { factor; term_ }
 			},
 			term_: {
 				[:mult, :divide, :band] => -> { mult_op; factor; term_ },
-				[:plus, :minus, :bor, :rsracket, :bequal, :nequal, :lthan, :gthan, :ltoequal, :gtoequal, :comma, :rbracket, :semicol] => EPSILON
+				[:plus, :minus, :bor, :rsbracket, :bequal, :nequal, :lthan, :gthan, :ltoequal, :gtoequal, :comma, :rbracket, :semicol] => EPSILON
 			},
 			factor: {
 				[:id] => -> { variable; factor_ },
@@ -192,7 +192,7 @@ class Parser
 			},
 			factor_: {
 				[:minus] => -> { match :minus, :gthan, :id, :lbracket; a_params; match :rbracket },
-				[:mult, :divide, :band, :plus, :minus, :bor, :rsracket, :bequal, :nequal, :lthan, :gthan, :ltoequal, :gtoequal, :comma, :rbracket, :semicol] => EPSILON
+				[:mult, :divide, :band, :plus, :minus, :bor, :rsbracket, :bequal, :nequal, :lthan, :gthan, :ltoequal, :gtoequal, :comma, :rbracket, :semicol] => EPSILON
 			},
 			minusfactor: {
 				[:gthan] => -> {
@@ -210,11 +210,11 @@ class Parser
 			},
 			r_id_nest_list: {
 				[:period] => -> { match :period, :id; indice_list; r_id_nest_list },
-				[:equal, :minus, :rbracket, :mult, :divide, :band, :plus, :minus, :bor, :rsracket, :bequal, :nequal, :lthan, :gthan, :ltoequal, :gtoequal, :comma, :semicol] => EPSILON
+				[:equal, :minus, :rbracket, :mult, :divide, :band, :plus, :minus, :bor, :rsbracket, :bequal, :nequal, :lthan, :gthan, :ltoequal, :gtoequal, :comma, :semicol] => EPSILON
 			},
 			indice_list: {
-				[:lsracket] => -> { match :lsracket; arith_expr; match :rsracket; indice_list },
-				[:period, :equal, :minus, :rbracket, :mult, :divide, :band, :plus, :minus, :bor, :rsracket, :bequal, :nequal, :lthan, :gthan, :ltoequal, :gtoequal, :comma, :semicol] => EPSILON
+				[:lsbracket] => -> { match :lsbracket; arith_expr; match :rsbracket; indice_list },
+				[:period, :equal, :minus, :rbracket, :mult, :divide, :band, :plus, :minus, :bor, :rsbracket, :bequal, :nequal, :lthan, :gthan, :ltoequal, :gtoequal, :comma, :semicol] => EPSILON
 			},
 			type: {
 				# set the type of the current record

@@ -64,7 +64,7 @@ class ErrorReport
 		if @syntax_error
 			line_number, relative_position = get_line_number_and_relative_position(@syntax_error[1] + 1)
 			# highlight if the flag is set
-			line = (highlight) ? highlight(String.new(@lines[line_number]), @syntax_error[0], relative_position) : @lines[line_number]
+			line = (highlight) ? highlight(String.new(@lines[line_number]), @syntax_error[0], relative_position) : show_position(@lines[line_number], relative_position)
 		end
 		errors += "\nSyntax error on line #{line_number + 1}\n\n#{line}\n"
 		errors += "#{@syntax_error[2].join ', '} expected."
@@ -90,5 +90,9 @@ class ErrorReport
 		# replace the substring containing the error
 		line[relative_position - error.length, error.length] = error.red
 		line
+	end
+
+	def show_position(line, relative_position)
+		"#{line.insert(relative_position, ' ')}#{(line.gsub(/\S/, ' ')).insert(relative_position, '^')}"
 	end
 end
