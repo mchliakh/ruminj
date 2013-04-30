@@ -12,9 +12,6 @@ A lexical analyser written in Ruby.
 class Scanner
 	# Class for containing tokens.
 	class Token
-		def self.end_of_stream
-			self.new('$', nil, nil, nil)
-		end
 		def initialize(name, value, line, position)
 			@name = name
 			@value = value
@@ -43,7 +40,7 @@ class Scanner
 					match = @source[value]
 					if match
 						# save the last error
-						@error_report.save
+						@error_report.save_token_error
 						# yield token
 						yielder.yield Token.new(key, match.gsub(/\s+\z/, ''), line, position) unless [:comment, :mlcomment, :wsp].include? key
 						newlines = match.scan(/\n/).size
@@ -66,13 +63,14 @@ class Scanner
 				end
 				unless success
 					# add the first character to the current error
-					@error_report.update_error(@source[0])
+					@error_report.update_token_error(@source[0])
 					# update position
-					@error_report.update_position(line, position += 1)
+					@error_report.update_token_error_position(line, position += 1)
 					# remove the first character
 					@source[0] = ''
 				end
 			end
+			yielder.yield Token.new('$', '', line, position)
 		end
 
 		# advance to the first token
@@ -85,7 +83,6 @@ class Scanner
 		begin
 			@current = @tokenizer.next
 		rescue StopIteration
-			@current = Token.end_of_stream
 		end
 	end
 

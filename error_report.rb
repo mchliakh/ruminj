@@ -16,82 +16,79 @@ class ErrorReport
 		# save each line
 		@source.each_line {|line| @lines << line}
 
-		@errors = []
-		@current_error = ''
+		@token_errors = []
+		@current_token_error = ''
+		@syntax_errors = []
 	end
 
-	def update_error(error)
-		@current_error += error
+	def update_token_error(error)
+		@current_token_error += error
 	end
 
-	def update_position(line, position)
+	def update_token_error_position(line, position)
 		@current_line = line
 		@current_position = position
 	end
 
-	def save
-		unless @current_error.empty?
+	def save_token_error
+		unless @current_token_error.empty?
 			# save current error
-			@errors << [@current_error, @current_line, @current_position]
+			@token_errors << [@current_token_error, @current_line, @current_position]
 			# reset variables
-			@current_error = ''
+			@current_token_error = ''
 			@current_line = nil
 			@current_position = nil
 		end
 	end
 
-	def syntax_error(actual, expected)
-		@syntax_error = [actual.value, actual.position, expected]
+	def add_syntax_error(actual, expected)
+		@syntax_errors << [actual, expected]
 	end
 
-	def log_errors(file_name)
-		File.open("#{file_name}.log", 'a') {|f| f.write "[#{Time.now}]\n#{get_errors}"} unless @errors.empty?
+	def syntax_error_count
+		@syntax_errors.count
 	end
 
-	def get_errors
-		errors = ''
+	def log_token_errors(file_name)
+		File.open("#{file_name}.log", 'a') {|f| f.write "[#{Time.now}]\n#{get_token_errors}"} unless @token_errors.empty?
+	end
+
+	def token_errors
+		token_errors = ''
 		# append lexical errors
-		@errors.each do |error|
-			# highlight if the flag is set
+		@token_errors.each do |error|
 			line = highlight(String.new(@lines[error[1]]), error[0], error[2])
-			errors += "#{error[1] + 1}: #{line}"
+			token_errors += "#{error[1] + 1}: #{line}"
 		end
-		# # append syntax error
-		# if @syntax_error
-		# 	line_number, relative_position = get_line_number_and_relative_position(@syntax_error[1] + 1)
-		# 	# highlight if the flag is set
-		# 	line = (highlight) ? highlight(String.new(@lines[line_number]), @syntax_error[0], relative_position) : show_position(@lines[line_number], relative_position)
-		# end
-		# errors += "\nSyntax error on line #{line_number + 1}\n\n#{line}\n"
-		# errors += "#{@syntax_error[2].join ', '} expected."
-		errors
+		token_errors
+	end
+
+	def syntax_errors
+		syntax_errors = ''
+		@syntax_errors.each do |error|
+			actual, expected = error[0], error[1]
+			line = show_position(@lines[actual.line], actual.position)
+			syntax_errors += "\nSyntax error on line #{actual.line + 1}\n\n#{line}\n"
+			syntax_errors += "#{expected.join ', '} expected."
+		end
+		syntax_errors
 	end
 
 	def print
-		if @errors.count > 0
-			puts "#{@errors.count} token error#{@errors.count == 1 ? '' : 's'}.\n".red
-			puts get_errors
-		else
-			puts "No errors to report!".green
+		if @token_errors.count > 0
+			puts "#{@token_errors.count} token error#{s_if(@token_errors.count)}.\n".red
+			puts token_errors
+		end
+		if @syntax_errors.count > 0
+			puts "#{@syntax_errors.count} syntax error#{s_if(@syntax_errors.count)}.\n".red
+			puts syntax_errors
 		end
 	end
 
 	private
 
-		def get_line_number_and_relative_position(position)
-			total, last_total = 0, 0
-			line_number = nil
-			# count the number of lines until position is reached
-			@lines.each_with_index do |line, index|
-				# previous total is saved for calculating relative position
-				last_total = total
-				total += line.length
-				if total >= position
-					line_number = index
-					break
-				end
-			end
-			[line_number, position - last_total]
+		def s_if(count)
+			count == 1 ? '' : 's'
 		end
 
 		def highlight(str, target, position)
@@ -100,7 +97,8 @@ class ErrorReport
 			str
 		end
 
-		def show_position(line, relative_position)
-			"#{line.insert(relative_position, ' ')}#{(line.gsub(/\S/, ' ')).insert(relative_position, '^')}"
+		def show_position(str, position)
+			puts "position yo: #{position}"
+			"#{str.insert(position, ' ')}\n#{(str.gsub(/\S/, ' ')).insert(position, '^')}"
 		end
 end

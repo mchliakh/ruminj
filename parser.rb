@@ -10,6 +10,8 @@ A syntacitc analyser written in Ruby.
 $LOAD_PATH << '.'
 require 'symbol_table'
 
+SKIP_ERRORS = 1
+
 # Syntacitc analyzer class.
 class Parser
 	EPSILON = -> {}
@@ -272,14 +274,17 @@ class Parser
 					(e.call; return) if @scanner.matches? p
 					expected += p
 				end
-				@error_report.syntax_error(@scanner.current, expected)
-				exit_with_errors
+				skip_error(expected)
 			end
 		end
 	end
 
 	def parse
 		prog
+		print
+	end
+
+	def print
 		@error_report.print
 		# @current_record.print
 	end
@@ -292,8 +297,7 @@ class Parser
 					@scanner.next_token
 					# puts "Matched #{t}".green
 				else
-					@error_report.syntax_error(@scanner.current, [t])
-					exit_with_errors
+					skip_error([t])
 				end
 			end
 		end
@@ -307,8 +311,7 @@ class Parser
 				# puts "Matched #{token}".green
 				current.value
 			else
-				@error_report.syntax_error(@scanner.current, [token])
-				exit_with_errors
+				skip_error([token])
 			end
 		end
 
@@ -361,7 +364,12 @@ class Parser
 			abort "#{klass.name.split('::').last} #{id} is defined twice!" if @temp.find_local(id, klass)
 		end
 
-		def exit_with_errors
-			abort(@error_report.get_errors)
+		def skip_error(expected)
+			@error_report.add_syntax_error(@scanner.current, expected)
+			@scanner.next_token
+			if @error_report.syntax_error_count >= SKIP_ERRORS
+				print
+				abort
+			end
 		end
 end
