@@ -28,7 +28,7 @@ module SymbolTable
 		attr_reader :symbol_table
 
 		def insert(record)
-			puts "Inserted #{record.class.name.split('::').last} #{record.id} into #{self.id}".red
+			# puts "Inserted #{record.class.name.split('::').last} #{record.id} into #{self.id}".red
 			record.parent = self
 			@symbol_table[[record.id, record.class.name]] = record
 		end

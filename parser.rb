@@ -264,7 +264,7 @@ class Parser
 			}
 		}.each do |n, f|
 			self.class.send :define_method, n do
-				puts "Now in #{n}"
+				# puts "Now in #{n}"
 				# puts "The current record is #{@current_record.class.name.split('::').last}"
 				expected = []
 				f.each do |p, e|
@@ -280,7 +280,8 @@ class Parser
 
 	def parse
 		prog
-		@current_record.print
+		@error_report.print
+		# @current_record.print
 	end
 
 	private
@@ -289,7 +290,7 @@ class Parser
 			tokens.each do |t|
 				if @scanner.matches? [t]
 					@scanner.next_token
-					puts "Matched #{t}".green
+					# puts "Matched #{t}".green
 				else
 					@error_report.syntax_error(@scanner.current, [t])
 					exit_with_errors
@@ -303,7 +304,7 @@ class Parser
 			if @scanner.matches? [token]
 				current = @scanner.current
 				@scanner.next_token
-				puts "Matched #{token}".green
+				# puts "Matched #{token}".green
 				current.value
 			else
 				@error_report.syntax_error(@scanner.current, [token])
@@ -361,6 +362,6 @@ class Parser
 		end
 
 		def exit_with_errors
-			abort(@error_report.get_errors(false))
+			abort(@error_report.get_errors)
 		end
 end

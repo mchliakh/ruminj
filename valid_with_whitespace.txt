@@ -18,18 +18,16 @@ class Adder {
 	integer add2(integer a, integer b) {
 		integer a;
 		integer b;
-		return (a + b);
+		return (_a + b);
 	};
 
 	integer test() {
 		// the scanner interprets 'return(' as an id
 		return (->add1());
 	};
+	$
 };
 
-/*
-A little nothing.
-*/
 class LittleNothing {
 	Adder a;
 	integer test;
