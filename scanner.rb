@@ -13,16 +13,17 @@ class Scanner
 	# Class for containing tokens.
 	class Token
 		def self.end_of_stream
-			self.new('$', nil, nil)
+			self.new('$', nil, nil, nil)
 		end
-		def initialize(name, value, position)
+		def initialize(name, value, line, position)
 			@name = name
 			@value = value
+			@line = line
 			@position = position
 		end
-		attr_reader :name, :value, :position
+		attr_reader :name, :value, :line, :position
 		def to_s
-			"#{@name} (#{@value}) [#{@position}]"
+			"#{@name} \"#{@value}\" #{@line+1}:#{@position+1}"
 		end
 	end
 	
@@ -33,6 +34,7 @@ class Scanner
 		@error_report = error_report
 
 		@tokenizer = Enumerator.new do |yielder|
+			line = 0
 			position = 0
 			# repeat until source is consumed
 			while !@source.empty? do
@@ -42,9 +44,18 @@ class Scanner
 						# save the last error
 						@error_report.save
 						# yield token
-						yielder.yield Token.new(key, @source[value].sub(/\s+\z/, ''), position) unless [:comment, :mlcomment, :wsp].include? key
-						# increment position
-						position += @source[value].length
+						yielder.yield Token.new(key, @source[value].sub(/\s+\z/, ''), line, position) unless [:comment, :mlcomment, :wsp].include? key
+						newlines = @source[value].scan(/\n/).size
+						# count newlines in match
+						if newlines > 0
+							# update line
+							line = line + newlines
+							# reset position
+							position = 0
+						else
+							# increment position
+							position += @source[value].length
+						end
 						# consume token
 						@source.gsub!(value, '')
 						success = true
@@ -71,6 +82,7 @@ class Scanner
 	def next_token
 		begin
 			@current = @tokenizer.next
+			puts "TOKEN: #{@current}"
 		rescue StopIteration
 			@current = Token.end_of_stream
 		end

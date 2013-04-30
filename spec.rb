@@ -20,7 +20,7 @@ module Spec
 	REG_EXPS = {
 		wsp: /\A\s+/,
 		comment: /\A\/\/.*$/,
-		mlcomment: /\A\/\*.*\*\//m,
+		mlcomment: /\A\/\*.*?\*\//m, # non-greedy
 		bequal: /\A==/,
 		nequal: /\A<>/,
 		ltoequal: /\A<=/,

@@ -1,5 +1,5 @@
 /*
-A class for adding numbers.
+Test case: missing space after return.
 */
 class Adder {
 	// instance variables
@@ -22,10 +22,14 @@ class Adder {
 	};
 
 	integer test() {
-		return(->add1());
+		// the scanner interprets 'return(' as an id
+		return (->add1());
 	};
 };
 
+/*
+A little nothing.
+*/
 class LittleNothing {
 	Adder a;
 	integer test;
