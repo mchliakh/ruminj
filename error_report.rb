@@ -19,6 +19,7 @@ class ErrorReport
 		@token_errors = []
 		@current_token_error = ''
 		@syntax_errors = []
+		@semantic_errors = []
 	end
 
 	def update_token_error(error)
@@ -43,6 +44,10 @@ class ErrorReport
 
 	def add_syntax_error(actual, expected)
 		@syntax_errors << [actual, expected]
+	end
+
+	def add_semantic_error(token, message)
+		@semantic_errors << [token, message]
 	end
 
 	def syntax_error_count
@@ -74,6 +79,15 @@ class ErrorReport
 		syntax_errors
 	end
 
+	def semantic_errors
+		semantic_errors = ''
+		@semantic_errors.each do |error|
+			line = @lines[error[0].line]
+			semantic_errors += "\nSemantic error on line #{error[0].line + 1}: #{error[1]}\n\n#{line}\n"
+		end
+		semantic_errors
+	end
+
 	def print
 		if @token_errors.count > 0
 			puts "#{@token_errors.count} token error#{s_if(@token_errors.count)}.\n".red
@@ -82,6 +96,10 @@ class ErrorReport
 		if @syntax_errors.count > 0
 			puts "#{@syntax_errors.count} syntax error#{s_if(@syntax_errors.count)}.\n".red
 			puts syntax_errors
+		end
+		if @semantic_errors.count > 0
+			puts "#{@semantic_errors.count} semantic error#{s_if(@semantic_errors.count)}.\n".red
+			puts semantic_errors
 		end
 	end
 
@@ -98,7 +116,6 @@ class ErrorReport
 		end
 
 		def show_position(str, position)
-			puts "position yo: #{position}"
 			"#{str.insert(position, ' ')}\n#{(str.gsub(/\S/, ' ')).insert(position, '^')}"
 		end
 end

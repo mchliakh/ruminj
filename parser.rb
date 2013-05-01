@@ -1,9 +1,9 @@
 =begin
 Mikhail Chliakhovski
 COMP 442
-Assignment 2
+Assignment 3
 
-A syntacitc analyser written in Ruby.
+A syntacitc analyser with semantic checking written in Ruby.
 
 =end
 
@@ -30,7 +30,10 @@ class Parser
 			class_decl_list: {
 				[:classr] => -> {
 					match :classr
-					insert SymbolTable::Class.new(match_id :id)
+					id = match_id :id
+					klass = SymbolTable::Class.new(id)
+					check_for_duplicate_declaration(id, SymbolTable::Class, true)
+					insert klass
 					match :lcbrace; var_or_func_list; match :rcbrace, :semicol
 					scope_up
 					class_decl_list
@@ -285,11 +288,13 @@ class Parser
 	end
 
 	def print
+		@current_record.print
+		puts "\n"
 		@error_report.print
-		# @current_record.print
 	end
 
 	private
+
 		# attempts to match one or more tokens
 		def match(*tokens)
 			tokens.each do |t|
@@ -342,13 +347,13 @@ class Parser
 		end
 
 		def confirm_class_declaration
-			abort "Class #{@current_record.type} is undefined!" unless @global_scope.find(@current_record.type, SymbolTable::Class)
+			@error_report.add_semantic_error(@scanner.current, "Class #{@current_record.type} is undefined!") unless @global_scope.find(@current_record.type, SymbolTable::Class)
 		end
 
 		def confirm_variable_declaration(id)
 			return if @current_record.find_local(id, SymbolTable::Variable)
 			return if @current_record.descendant_of?(SymbolTable::Class) && @current_record.find_up_to(id, SymbolTable::Variable, SymbolTable::Class)
-			abort "Variable #{id} is undefined!"
+			@error_report.add_semantic_error(@scanner.current, "Variable #{id} is undefined!")
 		end
 
 		def confirm_function_declaration(id)
@@ -357,11 +362,12 @@ class Parser
 			else
 				return if @current_record.find_up_to(id, SymbolTable::Function, SymbolTable::Class)
 			end
-			abort "Function #{id} is undefined!"
+			@error_report.add_semantic_error(@scanner.current, "Function #{id} is undefined!")
 		end
 
-		def check_for_duplicate_declaration(id, klass)
-			abort "#{klass.name.split('::').last} #{id} is defined twice!" if @temp.find_local(id, klass)
+		def check_for_duplicate_declaration(id, klass, current=false)
+			record = current ? @current_record : @temp
+			@error_report.add_semantic_error(@scanner.current, "#{klass.name.split('::').last} #{id} is defined more than once!") if record.find_local(id, klass)
 		end
 
 		def skip_error(expected)
@@ -369,6 +375,7 @@ class Parser
 			@scanner.next_token
 			if @error_report.syntax_error_count >= SKIP_ERRORS
 				print
+				puts "\nAborted without finishing.".red
 				abort
 			end
 		end

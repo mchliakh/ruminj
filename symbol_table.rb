@@ -1,5 +1,3 @@
-
-
 module SymbolTable
 	class Record
 		def initialize(id=nil)
@@ -106,7 +104,7 @@ module SymbolTable
 		attr_accessor :id, :type
 	end
 
-	class Paramter < Variable
+	class Parameter < Variable
 	end
 
 	# class Array < Variable
