@@ -93,10 +93,12 @@ class ErrorReport
 			puts "#{@token_errors.count} token error#{s_if(@token_errors.count)}.\n".red
 			puts token_errors
 		end
+		puts "\n"
 		if @syntax_errors.count > 0
 			puts "#{@syntax_errors.count} syntax error#{s_if(@syntax_errors.count)}.\n".red
 			puts syntax_errors
 		end
+		puts "\n"
 		if @semantic_errors.count > 0
 			puts "#{@semantic_errors.count} semantic error#{s_if(@semantic_errors.count)}.\n".red
 			puts semantic_errors
